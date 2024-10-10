@@ -59,51 +59,73 @@ app.post("/register", (req, res) => {
   });
 });
 
+// Middleware para verificar el token JWT
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
 
-//login
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+
+  jwt.verify(token, 'secret_key', (err, decoded) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+    
+    // Si el token es válido, lo decodificamos y seguimos con la petición
+    req.userId = decoded.id;
+    next();
+  });
+};
+
+// login
 app.post("/login", (req, res) => {
-    const { email, password } = req.body;
-  
-    // Buscamos el email en la tabla login
-    const findUserSql = 'SELECT * FROM login WHERE email = ?';
-    db.query(findUserSql, [email], (err, result) => {
+  const { email, password } = req.body;
+
+  const findUserSql = 'SELECT * FROM login WHERE email = ?';
+  db.query(findUserSql, [email], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ error: 'Error fetching user' });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    bcrypt.compare(password, result[0].password, (err, isMatch) => {
       if (err) {
-        console.log(err);
-        return res.status(500).json({ error: 'Error fetching user' });
+        return res.status(500).json({ error: 'Error comparing passwords' });
       }
-  
-      if (result.length === 0) {
-        return res.status(404).json({ error: 'User not found' });
+
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid credentials' });
       }
-  
-      // Comparamos la contraseña ingresada con la encriptada en la base de datos
-      bcrypt.compare(password, result[0].password, (err, isMatch) => {
-        if (err) {
-          return res.status(500).json({ error: 'Error comparing passwords' });
-        }
-  
-        if (!isMatch) {
-          return res.status(401).json({ error: 'Invalid credentials' });
-        }
-  
-        // Aquí puedes generar un token JWT si lo deseas, por ahora devolvemos un éxito simple
-        res.status(200).json({ message: 'Login successful' });
-      });
+
+      // Aquí generamos el token JWT
+      const token = jwt.sign({ id: result[0].user_id }, 'secret_key', { expiresIn: '1h' });
+
+      // Enviamos el token al cliente
+      res.status(200).json({ message: 'Login successful', token });
     });
   });
+});
+
   
 
 
 // Leer usuarios
-app.get("/empleados", (req, res) => {
-    db.query('SELECT * FROM usuarios', (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.send(result);
-        }
-    });
+// Leer usuarios - Proteger la ruta del CRUD con el middleware verifyToken
+app.get("/empleados", verifyToken, (req, res) => {
+  db.query('SELECT * FROM usuarios', (err, result) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.send(result);
+      }
+  });
 });
+
 
 // Actualizar usuario
 app.put("/update", (req, res) => {
@@ -119,6 +141,7 @@ app.put("/update", (req, res) => {
         }
     );
 });
+
 
 // Eliminar usuario
 app.delete("/delete/:id", (req, res) => {
