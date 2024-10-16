@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import db from './models/db.js';
 import userRoutes from './routes/userRoutes.js';
+import ticketRoutes from './routes/ticketRoutes.js'; // Usa import en lugar de require
 
 const app = express();
 const PORT = 3001;
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 // Usa las rutas importadas
 app.use('/api/users', userRoutes);
+app.use('/api/tickets', ticketRoutes); // Agrega las rutas de los tickets
 
 // Iniciar el servidor
 app.listen(PORT, () => {
