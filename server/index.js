@@ -6,13 +6,15 @@ import userRoutes from './routes/userRoutes.js';
 import ticketRoutes from './routes/ticketRoutes.js'; // Usa import en lugar de require
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001; // Usar puerto de entorno si está disponible
 
 // Middlewares
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['https://transcendent-sawine-b81460.netlify.app', 'http://localhost:3000'], // Agrega ambos orígenes si estás probando localmente
+  credentials: true,  // Permitir credenciales, como cookies o tokens
 }));
+
 app.use(cookieParser());
 
 // Usa las rutas importadas

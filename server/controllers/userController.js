@@ -1,6 +1,6 @@
 import User from '../models/userModel.js';
 import db from '../models/db.js'; // Importar la conexión a la base de datos
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const registerUser = (req, res) => {
