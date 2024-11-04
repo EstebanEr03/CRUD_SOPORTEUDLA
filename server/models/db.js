@@ -1,21 +1,26 @@
-import mysql from 'mysql';
+// server/models/db.js
+import { Sequelize } from 'sequelize';
 
-const db = mysql.createConnection({
+// Local database configuration
+const db = new Sequelize('usuariossoporte_crud', 'root', '', {
+  host: 'localhost',
+  dialect: 'mysql',
+});
+
+/* Uncomment and use this if you want to connect to the remote database
+const db = new Sequelize('heroku_400060f9830c2e6', 'b8e0f4832953a9', '7ab139e7', {
   host: 'us-cluster-east-01.k8s.cleardb.net',
-  user: 'b8e0f4832953a9',
-  password: '7ab139e7',
-  database: 'heroku_400060f9830c2e6',
+  dialect: 'mysql',
 });
+*/
 
-db.connect((err) => {
-  if (err) {
-    console.error('Error conectando a la base de datos:', err);
-    return;
-  }
-  console.log('Conectado a la base de datos MySQL');
-});
+// Test the connection
+db.authenticate()
+  .then(() => {
+    console.log('Connected to the MySQL database using Sequelize');
+  })
+  .catch((error) => {
+    console.error('Unable to connect to the MySQL database:', error);
+  });
 
 export default db;
-
-mysql://b8e0f4832953a9:7ab139e7@us-cluster-east-01.k8s.cleardb.net/heroku_400060f9830c2e6?reconnect=true
-
