@@ -49,29 +49,39 @@ export const registerUser = async (req, res) => {
 
 // Login function
 export const loginUser = async (req, res) => {
-  const { email, password, rol_id } = req.body;
+  const { email, password } = req.body;
 
   try {
-    // Check if user exists in the `login` table with the specified email
+    // Verificar si el usuario existe en la tabla `login`
     const userLogin = await Login.findOne({ where: { email } });
-    if (!userLogin) return res.status(404).json({ error: 'User not found' });
+    if (!userLogin) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
 
-    // Compare password
+    // Comparar la contraseña encriptada
     const isMatch = await bcrypt.compare(password, userLogin.password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
 
-    // Verify role in `usuarios` table
-    const userData = await User.findOne({ where: { id: userLogin.user_id, rol_id } });
-    if (!userData) return res.status(403).json({ error: 'Role mismatch or unauthorized access' });
+    // Obtener datos del usuario desde la tabla `usuarios`
+    const userData = await User.findOne({ where: { id: userLogin.user_id } });
+    if (!userData) {
+      return res.status(403).json({ error: 'Usuario no autorizado' });
+    }
 
-    // Generate token including the user's role ID
-    const token = jwt.sign({ id: userLogin.user_id, rol_id: userData.rol_id }, 'secret_key', { expiresIn: '1h' });
+    // Generar un token JWT con el ID y el rol
+    const token = jwt.sign(
+      { id: userLogin.user_id, rol_id: userData.rol_id },
+      process.env.JWT_SECRET || 'secret_key', // Mejor usar una variable de entorno para la clave
+      { expiresIn: '1h' }
+    );
 
-    // Send token and role ID in the response
-    res.status(200).json({ message: 'Login successful', token, rol_id: userData.rol_id });
+    // Devolver el token y el rol
+    res.status(200).json({ message: 'Inicio de sesión exitoso', token, rol_id: userData.rol_id });
   } catch (error) {
-    console.error("Error logging in:", error);
-    res.status(500).json({ error: 'Error logging in' });
+    console.error('Error durante el login:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 

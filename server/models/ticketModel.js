@@ -1,4 +1,3 @@
-// server/models/ticketModel.js
 import { DataTypes } from 'sequelize';
 import db from './db.js';
 import User from './userModel.js';
@@ -10,30 +9,32 @@ const Ticket = db.define('Ticket', {
     type: DataTypes.ENUM('Todos', 'Incidentes', 'Cambios', 'Problemas', 'Solicitudes'),
     allowNull: false,
   },
-  categoria: {
+  categoria_id: {
     type: DataTypes.INTEGER,
     references: {
       model: Category,
-      key: 'id'
+      key: 'id',
     },
+    allowNull: true,
   },
-  subcategoria: {
+  subcategoria_id: {
     type: DataTypes.INTEGER,
     references: {
       model: Subcategory,
-      key: 'id'
+      key: 'id',
     },
+    allowNull: true,
   },
   estado: {
     type: DataTypes.ENUM('En proceso', 'En espera', 'Abierto', 'Resuelto', 'Cerrado'),
     allowNull: false,
-    defaultValue: 'Abierto'
+    defaultValue: 'Abierto',
   },
-  usuario_solicitud: {
+  id_solicitante: {
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: 'id'
+      key: 'id',
     },
     allowNull: false,
   },
@@ -41,11 +42,11 @@ const Ticket = db.define('Ticket', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  gestor_proceso: {
+  id_gestor: { // Cambiado de gestor_proceso a id_gestor
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: 'id'
+      key: 'id',
     },
     allowNull: true,
   },
@@ -62,11 +63,11 @@ const Ticket = db.define('Ticket', {
     defaultValue: DataTypes.NOW,
   },
   tiempo_espera: {
-    type: DataTypes.INTEGER, // en minutos
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   tiempo_abierto: {
-    type: DataTypes.INTEGER, // en minutos
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   fecha_vencimiento: {
@@ -77,20 +78,20 @@ const Ticket = db.define('Ticket', {
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: 'id'
+      key: 'id',
     },
     allowNull: true,
-  }
+  },
 }, {
   tableName: 'tickets',
   timestamps: false,
 });
 
-// Definir relaciones
-Ticket.belongsTo(User, { as: 'solicitante', foreignKey: 'usuario_solicitud' });
-Ticket.belongsTo(User, { as: 'gestor', foreignKey: 'gestor_proceso' });
+// Relaciones actualizadas
+Ticket.belongsTo(User, { as: 'solicitante', foreignKey: 'id_solicitante' });
+Ticket.belongsTo(User, { as: 'gestor', foreignKey: 'id_gestor' }); // Actualizado
 Ticket.belongsTo(User, { as: 'agente', foreignKey: 'asignado_a' });
-Ticket.belongsTo(Category, { as: 'categoria_rel', foreignKey: 'categoria' });
-Ticket.belongsTo(Subcategory, { as: 'subcategoria_rel', foreignKey: 'subcategoria' });
+Ticket.belongsTo(Category, { as: 'categoria_rel', foreignKey: 'categoria_id' });
+Ticket.belongsTo(Subcategory, { as: 'subcategoria_rel', foreignKey: 'subcategoria_id' });
 
 export default Ticket;

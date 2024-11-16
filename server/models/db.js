@@ -15,12 +15,13 @@ const db = new Sequelize('heroku_400060f9830c2e6', 'b8e0f4832953a9', '7ab139e7',
 */
 
 // Test the connection
+// Log para verificar los modelos cargados
 db.authenticate()
   .then(() => {
-    console.log('Connected to the MySQL database using Sequelize');
+    console.log('Conexión a la base de datos exitosa.');
+    console.log('Modelos definidos:', db.models); // Esto listará todos los modelos registrados
   })
-  .catch((error) => {
-    console.error('Unable to connect to the MySQL database:', error);
-  });
+  .catch((error) => console.error('Error al conectar a la base de datos:', error));
+
 
 export default db;

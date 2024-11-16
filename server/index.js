@@ -23,6 +23,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes); // Agrega las rutas de los tickets
 app.use('/api/categories', categoryRoutes); // Define el prefijo para el endpoint de categorías
 
+
 // Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);

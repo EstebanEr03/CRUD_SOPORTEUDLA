@@ -2,6 +2,7 @@
 import Ticket from '../models/ticketModel.js';
 import User from '../models/userModel.js';
 import HistoricoAsignaciones from '../models/historicoAsignacionesModel.js';
+import Category from '../models/categoryModel.js'; // Asegúrate de que la ruta es correcta
 import Subcategory from '../models/subcategoryModel.js'; // Importamos el modelo de subcategoría para tiempo estimado
 
 
@@ -59,28 +60,43 @@ export const createTicket = async (req, res) => {
 
 // Consultar Tickets - Acceso según rol
 export const getTickets = async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'No estás autenticado. Proporciona un token válido.' });
-  }
+  console.log('Usuario autenticado:', req.user); // Verificar datos del usuario
 
   const { rol_id, user_id } = req.user;
 
   try {
     let tickets;
-    if (rol_id === '2') { // Gestor
-      tickets = await Ticket.findAll();
-    } else if (rol_id === '3') { // Agente
-      tickets = await Ticket.findAll({ where: { asignado_a: user_id } });
+
+    if (rol_id == '2') { // Gestor
+      tickets = await Ticket.findAll({
+        include: [
+          { model: Category, as: 'categoria_rel', attributes: ['nombre'] }, // Incluir nombre de categoría
+          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] }, // Incluir nombre de subcategoría
+          { model: User, as: 'solicitante', attributes: ['nombre'] }, // Incluir nombre del solicitante
+        ],
+      });
+    } else if (rol_id == '3') { // Agente
+      tickets = await Ticket.findAll({
+        where: { asignado_a: user_id },
+        include: [
+          { model: Category, as: 'categoria_rel', attributes: ['nombre'] },
+          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] },
+          { model: User, as: 'solicitante', attributes: ['nombre'] },
+        ],
+      });
     } else {
+      console.log('El usuario no tiene permiso para obtener tickets.');
       return res.status(403).json({ error: 'No tienes permisos para acceder a los tickets.' });
     }
 
+    console.log('Tickets obtenidos:', tickets);
     res.status(200).json(tickets);
   } catch (error) {
-    console.error("Error al obtener los tickets:", error);
+    console.error('Error al obtener los tickets:', error.message);
     res.status(500).json({ error: 'Error al obtener los tickets' });
   }
 };
+
 
 
 

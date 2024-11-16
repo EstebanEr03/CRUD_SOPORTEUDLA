@@ -1,7 +1,7 @@
 // server/models/subcategoryModel.js
 import { DataTypes } from 'sequelize';
 import db from './db.js';
-import Category from './categoryModel.js';
+import Category from './categoryModel.js'; // Importación correcta
 
 const Subcategory = db.define('Subcategory', {
   nombre: {
@@ -16,16 +16,17 @@ const Subcategory = db.define('Subcategory', {
     type: DataTypes.INTEGER,
     references: {
       model: Category,
-      key: 'id'
-    }
-  }
+      key: 'id',
+    },
+  },
 }, {
   tableName: 'subcategorias',
   timestamps: false,
 });
 
-// Definir la relación uno a muchos entre Category y Subcategory
+// Definir la relación
 Category.hasMany(Subcategory, { foreignKey: 'categoria_id', as: 'subcategories' });
 Subcategory.belongsTo(Category, { foreignKey: 'categoria_id', as: 'category' });
 
 export default Subcategory;
+
