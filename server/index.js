@@ -19,7 +19,7 @@ app.use(cors({
 app.use(cookieParser());
 
 // Usa las rutas importadas
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); // Asegúrate de que esta línea exista
 app.use('/api/tickets', ticketRoutes); // Agrega las rutas de los tickets
 app.use('/api/categories', categoryRoutes); // Define el prefijo para el endpoint de categorías
 

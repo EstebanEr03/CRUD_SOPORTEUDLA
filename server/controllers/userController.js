@@ -88,13 +88,18 @@ export const loginUser = async (req, res) => {
 // Get all empleados
 export const getEmpleados = async (req, res) => {
   try {
-    const empleados = await User.findAll();
+    const empleados = await User.findAll({
+      attributes: ['id', 'nombre', 'edad', 'sede', 'area', 'rol_id'], // Selecciona los atributos necesarios
+    });
+    console.log('Usuarios obtenidos:', empleados); // Agrega este log para verificar los datos en el servidor
     res.status(200).json(empleados);
   } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: 'Error fetching users' });
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 };
+
+
 
 // Update an empleado
 export const updateEmpleado = async (req, res) => {

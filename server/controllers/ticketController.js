@@ -103,20 +103,23 @@ export const getTickets = async (req, res) => {
 // Actualizar Ticket - Cambiar estado (solo Agentes)
 export const updateTicketStatus = async (req, res) => {
   const { id } = req.params;
-  const { estado } = req.body;
+  const updates = req.body; // Contiene todos los datos enviados desde el frontend
 
   try {
     const ticket = await Ticket.findByPk(id);
-    if (!ticket) return res.status(404).json({ error: 'Ticket no encontrado' });
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket no encontrado" });
+    }
 
-    ticket.estado = estado;
-    await ticket.save();
-    res.status(200).json({ message: 'Estado del ticket actualizado', ticket });
+    // Actualizar todos los campos enviados
+    await ticket.update(updates);
+    res.status(200).json({ message: "Ticket actualizado correctamente", ticket });
   } catch (error) {
     console.error("Error al actualizar el ticket:", error);
-    res.status(500).json({ error: 'Error al actualizar el ticket' });
+    res.status(500).json({ error: "Error al actualizar el ticket" });
   }
 };
+
 
 // Eliminar Ticket - Solo Gestores
 export const deleteTicket = async (req, res) => {
@@ -189,5 +192,29 @@ export const asignarTicket = async (req, res) => {
   } catch (error) {
     console.error("Error en la asignación automática:", error);
     res.status(500).json({ error: 'Error en la asignación automática' });
+  }
+};
+
+// Obtener un ticket por su ID
+export const getTicketById = async (req, res) => {
+  const { id } = req.params; // Obtener el ID desde los parámetros de la ruta
+
+  try {
+    const ticket = await Ticket.findByPk(id, {
+      include: [
+        { model: Category, as: 'categoria_rel', attributes: ['nombre'] }, // Incluir categoría relacionada
+        { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] }, // Incluir subcategoría relacionada
+        { model: User, as: 'solicitante', attributes: ['nombre'] }, // Incluir solicitante
+      ],
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket no encontrado' });
+    }
+
+    res.status(200).json(ticket); // Enviar el ticket encontrado
+  } catch (error) {
+    console.error('Error al obtener el ticket por ID:', error);
+    res.status(500).json({ error: 'Error al obtener el ticket' });
   }
 };
