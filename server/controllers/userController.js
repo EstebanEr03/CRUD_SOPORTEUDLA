@@ -88,10 +88,11 @@ export const loginUser = async (req, res) => {
 // Get all empleados
 export const getEmpleados = async (req, res) => {
   try {
+    console.log('Solicitud recibida para obtener empleados');
     const empleados = await User.findAll({
-      attributes: ['id', 'nombre', 'edad', 'sede', 'area', 'rol_id'], // Selecciona los atributos necesarios
+      attributes: ['id', 'nombre', 'edad', 'sede', 'area', 'rol_id'],
     });
-    console.log('Usuarios obtenidos:', empleados); // Agrega este log para verificar los datos en el servidor
+    console.log('Usuarios obtenidos:', empleados);
     res.status(200).json(empleados);
   } catch (error) {
     console.error('Error al obtener usuarios:', error);

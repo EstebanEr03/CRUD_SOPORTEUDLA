@@ -17,6 +17,7 @@ router.post('/login', loginUser); // Ruta para iniciar sesión
 
 // Ruta para obtener empleados (solo accesible para gestores, rol 2 en este caso)
 router.get('/empleados', verifyToken, verifyRole(2), getEmpleados);
+//router.get('/empleados', getEmpleados); // Temporalmente sin middleware
 
 // Ruta para actualizar empleados (requiere autenticación)
 router.put('/update', verifyToken, updateEmpleado);

@@ -88,10 +88,11 @@ const Ticket = db.define('Ticket', {
 });
 
 // Relaciones actualizadas
-Ticket.belongsTo(User, { as: 'solicitante', foreignKey: 'id_solicitante' });
-Ticket.belongsTo(User, { as: 'gestor', foreignKey: 'id_gestor' }); // Actualizado
-Ticket.belongsTo(User, { as: 'agente', foreignKey: 'asignado_a' });
-Ticket.belongsTo(Category, { as: 'categoria_rel', foreignKey: 'categoria_id' });
-Ticket.belongsTo(Subcategory, { as: 'subcategoria_rel', foreignKey: 'subcategoria_id' });
+Ticket.belongsTo(User, { as: 'solicitante', foreignKey: 'id_solicitante', onDelete: 'CASCADE' });
+Ticket.belongsTo(User, { as: 'gestor', foreignKey: 'id_gestor', onDelete: 'SET NULL' });
+Ticket.belongsTo(User, { as: 'agente', foreignKey: 'asignado_a', onDelete: 'SET NULL' });
+Ticket.belongsTo(Category, { as: 'categoria_rel', foreignKey: 'categoria_id', onDelete: 'SET NULL' });
+Ticket.belongsTo(Subcategory, { as: 'subcategoria_rel', foreignKey: 'subcategoria_id', onDelete: 'SET NULL' });
+
 
 export default Ticket;

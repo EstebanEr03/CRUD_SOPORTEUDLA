@@ -37,30 +37,52 @@ export const getMyTickets = async (req, res) => {
 };
 // Crear Ticket - Solo accesible por Solicitantes
 export const createTicket = async (req, res) => {
-  const { tipo_solicitud, categoria, subcategoria, usuario_solicitud, ubicacion, prioridad, urgencia } = req.body;
+  const {
+    tipo_solicitud,
+    categoria_id,
+    subcategoria_id,
+    id_solicitante,
+    ubicacion,
+    prioridad,
+    urgencia,
+    id_gestor,
+    fecha_vencimiento,
+    asignado_a,
+  } = req.body;
 
   try {
+    // Validar que los campos obligatorios están presentes
+    if (!tipo_solicitud || !id_solicitante || !prioridad || !urgencia) {
+      return res.status(400).json({ error: 'Faltan datos obligatorios para crear el ticket' });
+    }
+
+    // Crear el ticket
     const newTicket = await Ticket.create({
       tipo_solicitud,
-      categoria,
-      subcategoria,
-      usuario_solicitud,
-      ubicacion,
+      categoria_id: categoria_id || null, // Puede ser null si no se proporciona
+      subcategoria_id: subcategoria_id || null, // Puede ser null si no se proporciona
+      id_solicitante,
+      ubicacion: ubicacion || null, // Puede ser null si no se proporciona
       prioridad,
       urgencia,
-      estado: 'Abierto',
-      hora_solicitud: new Date()
+      id_gestor: id_gestor || null, // Puede ser null si no se proporciona
+      fecha_vencimiento: fecha_vencimiento || null, // Puede ser null si no se proporciona
+      asignado_a: asignado_a || null, // Puede ser null si no se proporciona
+      estado: 'Abierto', // Por defecto
+      hora_solicitud: new Date(), // Fecha y hora actual
     });
+
     res.status(201).json({ message: 'Ticket creado exitosamente', ticket: newTicket });
   } catch (error) {
-    console.error("Error al crear el ticket:", error);
+    console.error('Error al crear el ticket:', error);
     res.status(500).json({ error: 'Error al crear el ticket' });
   }
 };
 
+
 // Consultar Tickets - Acceso según rol
 export const getTickets = async (req, res) => {
-  console.log('Usuario autenticado:', req.user); // Verificar datos del usuario
+  console.log('Usuario autenticado:', req.user);
 
   const { rol_id, user_id } = req.user;
 
@@ -70,18 +92,22 @@ export const getTickets = async (req, res) => {
     if (rol_id == '2') { // Gestor
       tickets = await Ticket.findAll({
         include: [
-          { model: Category, as: 'categoria_rel', attributes: ['nombre'] }, // Incluir nombre de categoría
-          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] }, // Incluir nombre de subcategoría
-          { model: User, as: 'solicitante', attributes: ['nombre'] }, // Incluir nombre del solicitante
+          { model: Category, as: 'categoria_rel', attributes: ['nombre'] }, // Relación con categoría
+          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] }, // Relación con subcategoría
+          { model: User, as: 'solicitante', attributes: ['id', 'nombre'] }, // Relación con solicitante
+          { model: User, as: 'gestor', attributes: ['id', 'nombre'] }, // Relación con gestor
+          { model: User, as: 'agente', attributes: ['id', 'nombre'] }, // Relación con agente asignado
         ],
       });
     } else if (rol_id == '3') { // Agente
       tickets = await Ticket.findAll({
         where: { asignado_a: user_id },
         include: [
-          { model: Category, as: 'categoria_rel', attributes: ['nombre'] },
-          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] },
-          { model: User, as: 'solicitante', attributes: ['nombre'] },
+          { model: Category, as: 'categoria_rel', attributes: ['nombre'] }, // Relación con categoría
+          { model: Subcategory, as: 'subcategoria_rel', attributes: ['nombre'] }, // Relación con subcategoría
+          { model: User, as: 'solicitante', attributes: ['id', 'nombre'] }, // Relación con solicitante
+          { model: User, as: 'gestor', attributes: ['id', 'nombre'] }, // Relación con gestor
+          { model: User, as: 'agente', attributes: ['id', 'nombre'] }, // Relación con agente asignado
         ],
       });
     } else {
@@ -96,6 +122,8 @@ export const getTickets = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener los tickets' });
   }
 };
+
+
 
 
 
@@ -189,7 +217,7 @@ export const asignarTicket = async (req, res) => {
     });
 
     res.status(200).json({ message: 'Ticket asignado exitosamente', agente: agenteSeleccionado });
-  } catch (error) {
+  } catch (error) {   
     console.error("Error en la asignación automática:", error);
     res.status(500).json({ error: 'Error en la asignación automática' });
   }
