@@ -1,6 +1,8 @@
+
+
 // server/models/historicoAsignacionesModel.js
-import { DataTypes } from 'sequelize';
 import db from './db.js';
+import { DataTypes } from 'sequelize';
 import Ticket from './ticketModel.js';
 import User from './userModel.js';
 
@@ -48,8 +50,5 @@ const HistoricoAsignaciones = db.define('HistoricoAsignaciones', {
   timestamps: false,
 });
 
-// Definir relaciones
-HistoricoAsignaciones.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
-HistoricoAsignaciones.belongsTo(User, { foreignKey: 'agente_id', as: 'agente' });
 
 export default HistoricoAsignaciones;

@@ -13,7 +13,7 @@ const Category = db.define('Category', {
     allowNull: false,
   },
 }, {
-  tableName: 'categorias', // Asegúrate de que coincide con el nombre de la tabla en la base de datos
+  tableName: 'categorias',
   timestamps: false,
 });
 

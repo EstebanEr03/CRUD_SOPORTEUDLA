@@ -1,6 +1,6 @@
 // server/models/userModel.js
-import db from './db.js';
 import { DataTypes } from 'sequelize';
+import db from './db.js';
 
 const User = db.define('User', {
   nombre: {
@@ -24,7 +24,7 @@ const User = db.define('User', {
     allowNull: false,
   },
 }, {
-  tableName: 'usuarios',  // Points explicitly to the `usuarios` table
+  tableName: 'usuarios',
   timestamps: false,
 });
 

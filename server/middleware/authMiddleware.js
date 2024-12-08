@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 // Middleware para verificar el token JWT
 const verifyToken = (req, res, next) => {
-  console.log("Encabezados recibidos en el servidor:", req.headers); // <-- Añade este log
+  console.log("Encabezados recibidos en el servidor:", req.headers); // <-- Log para depuración
 
   const authHeader = req.headers['authorization'] || req.headers['Authorization']; // Maneja ambas variantes
 
@@ -34,17 +34,15 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-
-// Middleware para verificar roles específicos
-export const verifyRole = (requiredRole) => (req, res, next) => {
-  console.log(`Verificando rol. Requerido: ${requiredRole}, Usuario: ${req.user?.rol_id}`);
-  if (!req.user || req.user.rol_id !== requiredRole) {
+// Middleware para verificar múltiples roles
+export const verifyRole = (...roles) => (req, res, next) => {
+  console.log(`Verificando roles. Requeridos: ${roles}, Usuario: ${req.user?.rol_id}`);
+  if (!req.user || !roles.includes(parseInt(req.user.rol_id))) {
     return res.status(403).json({ error: 'No tienes permisos para acceder a esta ruta' });
   }
   next();
 };
 
 
-
-
 export default verifyToken;
+ 
