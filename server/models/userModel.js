@@ -22,7 +22,10 @@ const User = db.define('User', {
   rol_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-  },
+  },  is_admin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Identifica si es administrador
+  }
 }, {
   tableName: 'usuarios',
   timestamps: false,

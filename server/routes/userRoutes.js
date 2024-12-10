@@ -7,12 +7,16 @@ import {
   updateEmpleado,
   deleteEmpleado,
 } from '../controllers/userController.js';
-import verifyToken, { verifyRole } from '../middleware/authMiddleware.js'; // Incluye `verifyRole`
+import verifyToken, { verifyRole,verifyAdminGestor  } from '../middleware/authMiddleware.js'; // Incluye `verifyRole`
 
 const router = express.Router();
 
-router.get('/roles', getRoles); // Ruta para obtener roles
-router.post('/register', registerUser); // Ruta para registrar usuarios
+// Obtener roles
+router.get('/roles', verifyToken, verifyAdminGestor, getRoles);
+
+// Registrar usuarios (solo administradores)
+router.post('/register', registerUser);
+
 router.post('/login', loginUser); // Ruta para iniciar sesión
 
 // Ruta para obtener empleados (solo accesible para gestores, rol 2 en este caso)
@@ -20,9 +24,9 @@ router.get('/empleados', verifyToken, verifyRole(2), getEmpleados);
 //router.get('/empleados', getEmpleados); // Temporalmente sin middleware
 
 // Ruta para actualizar empleados (requiere autenticación)
-router.put('/update', verifyToken, updateEmpleado);
+router.put('/update', verifyToken,verifyAdminGestor,verifyRole(2), updateEmpleado);
 
 // Ruta para eliminar empleados (requiere autenticación)
-router.delete('/delete/:id', verifyToken, deleteEmpleado);
+router.delete('/delete/:id', verifyToken, verifyAdminGestor,verifyRole(2), deleteEmpleado);
 
 export default router;

@@ -19,20 +19,35 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET || 'secret_key', (err, decoded) => {
     if (err) {
       console.log('Error al verificar token:', err.message);
-      const errorMessage = err.name === 'TokenExpiredError'
-        ? 'Token expirado'
-        : 'Token inválido';
-      return res.status(401).json({ error: errorMessage });
+      return res.status(401).json({ error: 'Token inválido o expirado' });
     }
-
-    console.log('Token verificado. Datos decodificados:', decoded);
+  
+    console.log('Token decodificado:', decoded);
+  
     req.user = {
       id: decoded.id,
       rol_id: decoded.rol_id,
+      is_admin: decoded.is_admin, // Asegúrate de incluir esto
     };
     next();
-  });
+  });  
 };
+
+export const verifyAdminGestor = (req, res, next) => {
+  console.log('Verificando permisos en verifyAdminGestor:', req.user);
+
+  if (!req.user) {
+    return res.status(403).json({ error: 'Usuario no autenticado' });
+  }
+
+  if (req.user.is_admin || req.user.rol_id === 2) {
+    return next(); // Permitir acceso si es admin o tiene rol de gestor
+  }
+
+  return res.status(403).json({ error: 'No tienes permisos para esta acción' });
+};
+
+
 
 // Middleware para verificar múltiples roles
 export const verifyRole = (...roles) => (req, res, next) => {

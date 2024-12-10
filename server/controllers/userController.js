@@ -17,25 +17,28 @@ export const getRoles = async (req, res) => {
 };
 
 // Register new user with role
+// server/controllers/userController.js
 export const registerUser = async (req, res) => {
-  const { nombre, edad, sede, area, email, password, rol_id } = req.body;
+  const { nombre, edad, sede, area, email, password, rol_id, is_admin } = req.body;
+
+  if (![1, 2, 3].includes(parseInt(rol_id))) {
+    return res.status(400).json({ error: 'Invalid role ID' });
+  }
 
   try {
-    // Create the user record in `usuarios` table
     const newUser = await User.create({
       nombre,
       edad,
       sede,
       area,
       rol_id,
+      is_admin: is_admin || false, // Por defecto no es admin
     });
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert into `login` table with `user_id` from newUser
     await Login.create({
-      user_id: newUser.id, // Use the ID of the newly created user
+      user_id: newUser.id,
       email,
       password: hashedPassword,
     });
@@ -47,43 +50,45 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
+
 // Login function
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Verificar si el usuario existe en la tabla `login`
     const userLogin = await Login.findOne({ where: { email } });
     if (!userLogin) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Comparar la contraseña encriptada
     const isMatch = await bcrypt.compare(password, userLogin.password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // Obtener datos del usuario desde la tabla `usuarios`
     const userData = await User.findOne({ where: { id: userLogin.user_id } });
     if (!userData) {
       return res.status(403).json({ error: 'Usuario no autorizado' });
     }
 
-    // Generar un token JWT con el ID y el rol
     const token = jwt.sign(
-      { id: userLogin.user_id, rol_id: userData.rol_id },
-      process.env.JWT_SECRET || 'secret_key', // Mejor usar una variable de entorno para la clave
+      {
+        id: userLogin.user_id,
+        rol_id: userData.rol_id,
+        is_admin: userData.is_admin, // Incluye el estado de administrador
+      },
+      process.env.JWT_SECRET || 'secret_key',
       { expiresIn: '1h' }
     );
 
-    // Devolver el token y el rol
-    res.status(200).json({ message: 'Inicio de sesión exitoso', token, rol_id: userData.rol_id });
+    res.status(200).json({ message: 'Inicio de sesión exitoso', token, rol_id: userData.rol_id, is_admin: userData.is_admin });
   } catch (error) {
     console.error('Error durante el login:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
 
 // Get all empleados
 export const getEmpleados = async (req, res) => {
@@ -104,24 +109,36 @@ export const getEmpleados = async (req, res) => {
 
 // Update an empleado
 export const updateEmpleado = async (req, res) => {
-  const { id, nombre, edad, sede, area, rol_id } = req.body;
+  const { id, nombre, edad, sede, area, rol_id, is_admin } = req.body;
   try {
-    await User.update({ nombre, edad, sede, area, rol_id }, { where: { id } });
-    res.status(200).json({ message: 'User updated successfully' });
+    const result = await User.update(
+      { nombre, edad, sede, area, rol_id, is_admin },
+      { where: { id } }
+    );
+    if (result[0] === 0) {
+      return res.status(400).json({ error: 'No se encontró el empleado o no se realizaron cambios' });
+    }
+    res.status(200).json({ message: 'Usuario actualizado correctamente' });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ error: 'Error updating user' });
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({ error: 'Error interno al actualizar el usuario' });
   }
 };
+
+
 
 // Delete an empleado
 export const deleteEmpleado = async (req, res) => {
   const { id } = req.params;
   try {
-    await User.destroy({ where: { id } });
-    res.status(200).json({ message: 'User deleted successfully' });
+    const result = await User.destroy({ where: { id } });
+    if (result === 0) {
+      return res.status(400).json({ error: 'No se encontró el empleado' });
+    }
+    res.status(200).json({ message: 'Usuario eliminado correctamente' });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ error: 'Error deleting user' });
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ error: 'Error interno al eliminar el usuario' });
   }
 };
+
