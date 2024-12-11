@@ -131,19 +131,33 @@ root
 
 ### Pantalla de Inicio
 
-![Pantalla de Inicio](ruta/a/imagen_inicio.png)
+![Pantalla Inicio ](https://github.com/user-attachments/assets/2629e6d9-2aa0-49eb-a3b4-9d19759386c6)
+
 
 ### Gestión de Tickets
 
-![Gestión de Tickets](ruta/a/imagen_tickets.png)
+![Gestion Tickets](https://github.com/user-attachments/assets/52e58527-0b3f-4753-bdb8-dfa4580cd340)
 
-### Reportes
 
-![Reportes](ruta/a/imagen_reportes.png)
+## CrearTicket(Normal)
 
----
+![CrearTicketNormal](https://github.com/user-attachments/assets/c77c705c-ae95-401a-8569-9546fd8af16b)
 
-## Contribución
+## CrearTicket(Automatico)
+
+![CrearTicketAutomatico](https://github.com/user-attachments/assets/dbad28e1-ffb1-4eb7-8924-7f81b3828019)
+
+## Administrador Usuario(solo con usuario administrador)
+
+![AdministrarUsuariosa](https://github.com/user-attachments/assets/047b1fc2-ee29-4349-aa61-23faf2becaeb)
+
+## Interfaz Del Solicitante
+
+![Solicitar ticket por parte del Solicitante](https://github.com/user-attachments/assets/eee964d7-77c8-494e-8b9e-883fbb74ca3f)
+
+## Interfaz Del Agente de Soporte
+
+![Gestion de tickets por parte de agentes](https://github.com/user-attachments/assets/05bc6847-85db-41cd-aa7b-a3b0e2df00ed)
 
 Si quieres contribuir:
 
