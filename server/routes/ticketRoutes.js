@@ -10,13 +10,15 @@ import {
   getMyTickets,
   getTicketById,
   automaticTickets,
-  updateTicket 
+  updateTicket,
+  getTicketsReport
 } from '../controllers/ticketController.js';
 import verifyToken, { verifyRole } from '../middleware/authMiddleware.js'; // Importa los middlewares
 
 
 const router = express.Router();
 
+router.get('/report', verifyToken, verifyRole(2, 3), getTicketsReport);
 router.post('/create', verifyToken, verifyRole(2), createTicket); // Crear Ticket
 router.get('/all', verifyToken, verifyRole(2,3), getTickets); // Consultar todos los Tickets (Gestores)
 router.get('/assigned', verifyToken, verifyRole(3), getAssignedTickets); // Solo para agentes

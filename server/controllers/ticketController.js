@@ -1,4 +1,5 @@
 // server/controllers/ticketController.js
+import { Op } from 'sequelize';
 import Ticket from '../models/ticketModel.js';
 import User from '../models/userModel.js';
 import HistoricoAsignaciones from '../models/historicoAsignacionesModel.js';
@@ -580,5 +581,81 @@ export const updateTicket = async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar el ticket:", error);
     res.status(500).json({ error: "Error al actualizar el ticket" });
+  }
+};
+
+// Generar reporte de tickets por rango de fechas
+export const getTicketsReport = async (req, res) => {
+  const { startDate, endDate, estado, agenteId } = req.query; // Agregar agenteId como parámetro
+
+  try {
+    // Validar fechas
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: "Por favor, proporciona startDate y endDate." });
+    }
+
+    // Construir los rangos de fecha, asegurando que el final sea a las 23:59:59
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T23:59:59`);
+
+    console.log("Rango de fechas recibido:", { startDate, endDate });
+    console.log("Rango de fechas aplicado:", { start, end });
+
+    // Construir los filtros
+    const filtros = {
+      hora_solicitud: {
+        [Op.between]: [start, end],
+      },
+    };
+
+    // Agregar filtro por estado si se proporciona
+    if (estado) {
+      filtros.estado = estado;
+    }
+
+    // Agregar filtro por agente asignado si se proporciona
+    if (agenteId) {
+      filtros.asignado_a = agenteId;
+    }
+
+    console.log("Filtros aplicados:", filtros);
+
+    // Obtener los tickets desde la base de datos
+    const tickets = await Ticket.findAll({
+      where: filtros,
+      attributes: [
+        'id',
+        'tipo_solicitud',
+        'estado',
+        'hora_solicitud',
+        'ultimo_cambio_estado',
+        'tiempo_espera',
+        'tiempo_abierto',
+        'prioridad',
+        'urgencia',
+        'asignado_a',
+      ],
+    });
+
+    console.log("Tickets encontrados:", tickets.length);
+
+    if (!tickets || tickets.length === 0) {
+      return res.status(404).json({ error: "No se encontraron tickets con los filtros especificados." });
+    }
+
+    // Calcular estadísticas del reporte
+    const totalTickets = tickets.length;
+    const tiempoEsperaPromedio = tickets.reduce((acc, t) => acc + (t.tiempo_espera || 0), 0) / totalTickets;
+    const tiempoAbiertoPromedio = tickets.reduce((acc, t) => acc + (t.tiempo_abierto || 0), 0) / totalTickets;
+
+    res.status(200).json({
+      totalTickets,
+      tiempoEsperaPromedio: tiempoEsperaPromedio.toFixed(2),
+      tiempoAbiertoPromedio: tiempoAbiertoPromedio.toFixed(2),
+      tickets,
+    });
+  } catch (error) {
+    console.error("Error al generar el reporte:", error);
+    res.status(500).json({ error: "Error al generar el reporte." });
   }
 };
